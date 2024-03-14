@@ -61,4 +61,24 @@ class MainTest {
   }
 
   // TODO: Create your test(s) below. /////////////////////////////////////////
+  @Test
+  void testAddBigram_BigramInDatabase() throws SQLException {
+      Connection db = Main.createConnection();
+      try {
+          int wordId1 = Main.getId(db, "word1");
+          int wordId2 = Main.getId(db, "word2");
+          // Add a bigram to the database
+          Main.addBigram(db, wordId1, wordId2);
+          // Query the database to check if the bigram was inserted
+          PreparedStatement statement = db.prepareStatement("SELECT COUNT(*) AS c FROM bigrams WHERE words_id = ? AND next_words_id = ?");
+          statement.setInt(1, wordId1);
+          statement.setInt(2, wordId2);
+          ResultSet resultSet = statement.executeQuery();
+          // Check if the bigram was inserted successfully
+          assertTrue(resultSet.next(), "Expected one bigram to be inserted.");
+          assertEquals(1, resultSet.getInt("c"), "Expected one bigram to be inserted.");
+      } finally {
+          db.close();
+      }
+  }
 }
